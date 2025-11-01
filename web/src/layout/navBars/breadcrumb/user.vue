@@ -1,5 +1,10 @@
 <template>
 	<div class="layout-navbars-breadcrumb-user pr15" :style="{ flex: layoutUserFlexNum }">
+    <div class="layout-navbars-breadcrumb-user-icon" @click="onSearchClick">
+      <el-icon :title="$t('message.user.title2')">
+        <ele-Search />
+      </el-icon>
+    </div>
 		<el-dropdown :show-timeout="70" :hide-timeout="50" trigger="click" @command="onComponentSizeChange">
 			<div class="layout-navbars-breadcrumb-user-icon">
 				<i class="iconfont icon-ziti" :title="$t('message.user.title0')"></i>
@@ -28,11 +33,7 @@
 				</el-dropdown-menu>
 			</template>
 		</el-dropdown>
-		<div class="layout-navbars-breadcrumb-user-icon" @click="onSearchClick">
-			<el-icon :title="$t('message.user.title2')">
-				<ele-Search />
-			</el-icon>
-		</div>
+
 		<div class="layout-navbars-breadcrumb-user-icon" @click="onLayoutSetingClick">
 			<i class="icon-skin iconfont" :title="$t('message.user.title3')"></i>
 		</div>
