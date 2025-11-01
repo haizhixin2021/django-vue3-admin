@@ -81,9 +81,9 @@
 		<div></div>
 		<el-dropdown :show-timeout="70" :hide-timeout="50" @command="onHandleCommandClick">
 			<span class="layout-navbars-breadcrumb-user-link">
-				<el-badge is-dot class="item online-status">
-					<img :src="userInfos.avatar || headerImage" class="layout-navbars-breadcrumb-user-link-photo mr5" />
-				</el-badge>
+<!--				<el-badge is-dot class="item online-status">-->
+<!--					<img :src="userInfos.avatar || headerImage" class="layout-navbars-breadcrumb-user-link-photo mr5" />-->
+<!--				</el-badge>-->
 				{{ userInfos.username === '' ? 'common' : userInfos.username }}
 				<el-icon class="el-icon--right">
 					<ele-ArrowDown />
