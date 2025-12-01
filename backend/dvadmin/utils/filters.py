@@ -208,7 +208,59 @@ class DataLevelPermissionsSubFilter(DataLevelPermissionsFilter):
         u:Users = request.user
         if u.is_superuser:
             return queryset
+        # (0, "仅本人数据权限"),
+        # (1, "本部门及以下数据权限"),
+        # (2, "本部门数据权限"),
+        # (3, "全部数据权限"),
+        # (4, "自定数据权限")
+        re_api = api
+        _pk = request.parser_context["kwargs"].get('pk')
+        if _pk: # 判断是否是单例查询
+            re_api = re.sub(_pk,'{id}', api)
+        role_id_list = request.user.role.values_list('id', flat=True)
+        menu_button_ids = MenuButton.objects.filter(api=re_api,method=method).values_list('id', flat=True)
+        role_permission_list = []
+        if menu_button_ids:
+            role_permission_list=RoleMenuButtonPermission.objects.filter(
+                role__in=role_id_list,
+                role__status=1,
+                menu_button_id__in=menu_button_ids).values(
+                'data_range'
+            )
+        dataScope_list = []  # 权限范围列表
+        for ele in role_permission_list:
+                # 判断用户是否为超级管理员角色/如果拥有[全部数据权限]则返回所有数据
+            if ele.get("data_range") == 3:
+                return queryset
+            dataScope_list.append(ele.get("data_range"))
+        dataScope_list = list(set(dataScope_list))
+        # 4. 只为仅本人数据权限时只返回过滤本人数据，并且部门为自己本部门(考虑到用户会变部门，只能看当前用户所在的部门数据)
+        if 0 in dataScope_list:
+            return queryset.filter(
+                creator=request.user, dept_belong_id=u.dept_id
+            )
         dept_list = []
+        # 5. 自定数据权限 获取部门，根据部门过滤
+        for ele in dataScope_list:
+            if ele == 1:
+                dept_list.append(u.dept_id)
+                dept_list.extend(
+                    get_dept(
+                        u.dept_id,
+                    )
+                )
+            elif ele == 2:
+                dept_list.append(u.dept_id)
+            elif ele == 4:
+                dept_ids = RoleMenuButtonPermission.objects.filter(
+                    role__in=role_id_list,
+                    role__status=1,
+                    data_range=4).values_list(
+                    'dept__id',flat=True
+                )
+                dept_list.extend(
+                    dept_ids
+                )
         # 自己部门 交 管理部门
         if u.manage_dept.exists(): # 兼容旧数据
             for dept in u.manage_dept.all():
