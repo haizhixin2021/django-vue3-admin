@@ -48,7 +48,7 @@ export const createCrudOptions = function ({ crudExpose, context }: CreateCrudOp
 				//固定右侧
 				fixed: 'right',
 				width:  computed(() => {
-					if (auth('role:AuthorizedAdd') || auth('role:AuthorizedSearch')){
+					if (auth('role:AllAuthorizedUser') || auth('role:AllCanMenu')){
 						return 420;
 					}
 					return 320;
@@ -66,7 +66,7 @@ export const createCrudOptions = function ({ crudExpose, context }: CreateCrudOp
 					assignment: {
 						type: 'primary',
 						text: '授权用户',
-						show: auth('role:SetUserRole') || auth('role:AuthorizedSearch'),
+						show: auth('role:AllAuthorizedUser'),
 						click: (ctx: any) => {
 							const { row } = ctx;
 							context!.RoleUserDrawer.handleDrawerOpen(row);
