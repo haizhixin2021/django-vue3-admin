@@ -106,7 +106,7 @@ class FileViewSet(CustomModelViewSet):
     queryset = FileList.objects.all()
     serializer_class = FileSerializer
     filter_class = FileFilter
-    permission_classes = []
+    authentication_classes = []
 
     @action(methods=['GET'], detail=False)
     def get_all(self, request):
