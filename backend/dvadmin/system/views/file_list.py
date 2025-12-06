@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import connection
 from rest_framework import serializers
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 
 from application import dispatch
 from dvadmin.system.models import FileList
@@ -106,7 +107,7 @@ class FileViewSet(CustomModelViewSet):
     queryset = FileList.objects.all()
     serializer_class = FileSerializer
     filter_class = FileFilter
-    authentication_classes = []
+    permission_classes = [IsAuthenticated]
 
     @action(methods=['GET'], detail=False)
     def get_all(self, request):
