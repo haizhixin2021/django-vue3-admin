@@ -62,6 +62,13 @@ INSTALLED_APPS = [
     "dvadmin.system",
 ]
 
+#主要添加如下代码
+My_Apps = [
+	'wenyuan',  #新的应用写在这里
+]
+
+INSTALLED_APPS += My_Apps
+
 MIDDLEWARE = [
     "dvadmin.utils.middleware.HealthCheckMiddleware",
     "django.middleware.security.SecurityMiddleware",

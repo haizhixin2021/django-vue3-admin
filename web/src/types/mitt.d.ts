@@ -36,4 +36,5 @@ declare type LayoutMobileResize = {
 declare type MittMenu = {
 	children: RouteRecordRaw[];
 	item?: RouteItem;
+	path?: string;
 };

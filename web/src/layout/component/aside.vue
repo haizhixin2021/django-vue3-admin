@@ -44,7 +44,7 @@ const setCollapseStyle = computed(() => {
 	const asideBrColor = asideBrTheme.includes(menuBar) ? 'layout-el-aside-br-color' : '';
 	// 判断是否是手机端
 	if (state.clientWidth <= 1000) {
-		if (isCollapse) {
+		if (!isCollapse) {
 			document.body.setAttribute('class', 'el-popup-parent--hidden');
 			const asideEle = document.querySelector('.layout-container') as HTMLElement;
 			const modeDivs = document.createElement('div');
@@ -81,17 +81,15 @@ const closeLayoutAsideMobileMode = () => {
 	setTimeout(() => {
 		el?.parentNode?.removeChild(el);
 	}, 300);
-	const clientWidth = document.body.clientWidth;
-	if (clientWidth < 1000) themeConfig.value.isCollapse = false;
 	document.body.setAttribute('class', '');
 };
-const findFirstLevelIndex = (data, path) => {
+const findFirstLevelIndex = (data: RouteItems, path: string) => {
 	for (let index = 0; index < data.length; index++) {
 		const item = data[index];
     // 检查当前菜单项是否有子菜单，并查找是否在子菜单中找到路径
 		if (item.children && item.children.length > 0) {
 			// 检查子菜单中是否有匹配的路径
-			const childIndex = item.children.findIndex((child) => child.path === path);
+			const childIndex = item.children.findIndex((child: RouteItem) => child.path === path);
 			if (childIndex !== -1) {
 				return index; // 返回当前一级菜单的索引
 			}

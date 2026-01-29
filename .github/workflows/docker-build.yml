@@ -1,0 +1,102 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+env:
+  ALIYUN_REGISTRY: registry.cn-zhangjiakou.aliyuncs.com
+  ALIYUN_NAMESPACE: ${{ secrets.ALIYUN_NAMESPACE }}
+  ALIYUN_USERNAME: ${{ secrets.ALIYUN_USERNAME }}
+  ALIYUN_PASSWORD: ${{ secrets.ALIYUN_PASSWORD }}
+
+jobs:
+  build-and-push-django:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Aliyun Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.ALIYUN_REGISTRY }}
+          username: ${{ secrets.ALIYUN_USERNAME }}
+          password: ${{ secrets.ALIYUN_PASSWORD }}
+
+      - name: Build Django image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./docker_env/django/Dockerfile
+          push: true
+          tags: |
+            ${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-django:latest
+            ${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-django:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-django:buildcache
+          cache-to: type=registry,ref=${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-django:buildcache,mode=max
+
+  build-and-push-web:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Aliyun Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.ALIYUN_REGISTRY }}
+          username: ${{ secrets.ALIYUN_USERNAME }}
+          password: ${{ secrets.ALIYUN_PASSWORD }}
+
+      - name: Build Web image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./web
+          file: ./docker_env/web/Dockerfile
+          push: true
+          tags: |
+            ${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-web:latest
+            ${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-web:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-web:buildcache
+          cache-to: type=registry,ref=${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-web:buildcache,mode=max
+
+  build-and-push-celery:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Aliyun Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.ALIYUN_REGISTRY }}
+          username: ${{ secrets.ALIYUN_USERNAME }}
+          password: ${{ secrets.ALIYUN_PASSWORD }}
+
+      - name: Build Celery image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker_env/celery/Dockerfile
+          push: true
+          tags: |
+            ${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-celery:latest
+            ${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-celery:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-celery:buildcache
+          cache-to: type=registry,ref=${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-celery:buildcache,mode=max
