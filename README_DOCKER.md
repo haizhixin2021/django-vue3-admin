@@ -59,7 +59,20 @@ docker-compose up -d
 
 1. **Fork 本仓库到你的 GitHub 账户**
 
-2. **添加 Docker Hub Secrets**
+2. **创建阿里云命名空间**
+
+   登录阿里云容器镜像服务（ACR）：
+   - 访问：https://cr.console.aliyun.com/
+   - 进入"命名空间"页面
+   - 创建命名空间（例如：`your-namespace`）
+
+3. **获取阿里云访问凭证**
+
+   - 进入"访问凭证"页面
+   - 创建或获取用户名和密码
+   - 或者使用访问令牌（推荐）
+
+4. **添加 GitHub Secrets**
 
    进入你的 GitHub 仓库：
    - `Settings` -> `Secrets and variables` -> `Actions` -> `New repository secret`
@@ -68,16 +81,17 @@ docker-compose up -d
    
    | Secret 名称 | 说明 | 示例 |
    |------------|------|------|
-   | `DOCKER_USERNAME` | Docker Hub 用户名 | `your-dockerhub-username` |
-   | `DOCKER_PASSWORD` | Docker Hub 密码或访问令牌 | `dckr_pat_xxxxxxxx` |
+   | `ALIYUN_NAMESPACE` | 阿里云命名空间 | `your-namespace` |
+   | `ALIYUN_USERNAME` | 阿里云用户名 | `your-username` |
+   | `ALIYUN_PASSWORD` | 阿里云密码或访问令牌 | `your-password` |
 
-3. **触发自动构建**
+5. **触发自动构建**
 
    当代码推送到 `main` 或 `master` 分支时，GitHub Actions 会自动：
    - 构建 Django 后端 Docker 镜像
    - 构建 Web 前端 Docker 镜像
    - 构建 Celery Docker 镜像
-   - 推送所有镜像到 Docker Hub
+   - 推送所有镜像到阿里云镜像仓库
 
 ### 镜像标签策略
 
@@ -91,13 +105,13 @@ docker-compose up -d
 ```yaml
 services:
   dvadmin3-django:
-    image: your-dockerhub-username/django-vue3-admin-django:latest
+    image: registry.cn-zhangjiakou.aliyuncs.com/your-namespace/django-vue3-admin-django:latest
     
   dvadmin3-web:
-    image: your-dockerhub-username/django-vue3-admin-web:latest
+    image: registry.cn-zhangjiakou.aliyuncs.com/your-namespace/django-vue3-admin-web:latest
     
   dvadmin3-celery:
-    image: your-dockerhub-username/django-vue3-admin-celery:latest
+    image: registry.cn-zhangjiakou.aliyuncs.com/your-namespace/django-vue3-admin-celery:latest
 ```
 
 然后拉取最新镜像并重启服务：
