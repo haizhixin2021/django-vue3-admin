@@ -11,7 +11,8 @@ on:
       - master
 
 env:
-  ALIYUN_REGISTRY: registry.cn-zhangjiakou.aliyuncs.com
+  #ALIYUN_REGISTRY: registry.cn-zhangjiakou.aliyuncs.com
+  ALIYUN_REGISTRY: crpi-ve96f0fqjvdmecbl.cn-beijing.personal.cr.aliyuncs.com
   ALIYUN_NAMESPACE: ${{ secrets.ALIYUN_NAMESPACE }}
   ALIYUN_USERNAME: ${{ secrets.ALIYUN_USERNAME }}
   ALIYUN_PASSWORD: ${{ secrets.ALIYUN_PASSWORD }}
