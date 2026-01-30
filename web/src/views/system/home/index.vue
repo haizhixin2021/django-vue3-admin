@@ -9,9 +9,14 @@
 </template>
 
 <script lang="ts" name="home">
-import { toRefs, reactive, defineComponent, onMounted, ref, watch, nextTick, onActivated } from 'vue';
+import { defineComponent } from 'vue';
 
-
+export default defineComponent({
+	name: 'home',
+	setup() {
+		return {};
+	}
+});
 </script>
 
 <style scoped lang="scss">
