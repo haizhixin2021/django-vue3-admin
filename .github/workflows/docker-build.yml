@@ -37,14 +37,12 @@ jobs:
       - name: Build Django image
         uses: docker/build-push-action@v5
         with:
-          context: ./backend
+          context: .
           file: ./docker_env/django/Dockerfile
           push: true
           tags: |
             ${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-django:latest
             ${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-django:${{ github.sha }}
-          cache-from: type=registry,ref=${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-django:buildcache
-          cache-to: type=registry,ref=${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-django:buildcache,mode=max
 
   build-and-push-web:
     runs-on: ubuntu-latest
@@ -65,14 +63,12 @@ jobs:
       - name: Build Web image
         uses: docker/build-push-action@v5
         with:
-          context: ./web
+          context: .
           file: ./docker_env/web/Dockerfile
           push: true
           tags: |
             ${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-web:latest
             ${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-web:${{ github.sha }}
-          cache-from: type=registry,ref=${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-web:buildcache
-          cache-to: type=registry,ref=${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-web:buildcache,mode=max
 
   build-and-push-celery:
     runs-on: ubuntu-latest
@@ -99,5 +95,3 @@ jobs:
           tags: |
             ${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-celery:latest
             ${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-celery:${{ github.sha }}
-          cache-from: type=registry,ref=${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-celery:buildcache
-          cache-to: type=registry,ref=${{ env.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/django-vue3-admin-celery:buildcache,mode=max
