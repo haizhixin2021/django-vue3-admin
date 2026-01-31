@@ -1,6 +1,6 @@
 [
   {
-    "name": "文苑管理",
+    "name": "文源管理",
     "icon": "ele-Reading",
     "sort": 9,
     "is_link": false,
@@ -56,41 +56,6 @@
             "value": "readContent:Delete",
             "api": "/api/wenyuan/read_content/{id}/",
             "method": 3
-          }
-        ],
-        "menu_field": []
-      },
-      {
-        "name": "读书签到",
-        "icon": "ele-User",
-        "sort": 2,
-        "is_link": false,
-        "is_catalog": false,
-        "web_path": "/readSign",
-        "component": "wenyuan/readSign/index",
-        "component_name": "readSign",
-        "status": true,
-        "cache": false,
-        "visible": true,
-        "children": [],
-        "menu_button": [
-          {
-            "name": "查询",
-            "value": "readSign:Search",
-            "api": "/api/wenyuan/read_sign/",
-            "method": 0
-          },
-          {
-            "name": "单例",
-            "value": "readSign:Retrieve",
-            "api": "/api/wenyuan/read_sign/{id}/",
-            "method": 0
-          },
-          {
-            "name": "新增",
-            "value": "readSign:Create",
-            "api": "/api/wenyuan/read_sign/",
-            "method": 1
           },
           {
             "name": "编辑",
@@ -103,6 +68,12 @@
             "value": "readSign:Delete",
             "api": "/api/wenyuan/read_sign/{id}/",
             "method": 3
+          },
+          {
+            "name": "导入",
+            "value": "readContent:Import",
+            "api": "/api/wenyuan/read_content/",
+            "method": 1
           }
         ],
         "menu_field": []
