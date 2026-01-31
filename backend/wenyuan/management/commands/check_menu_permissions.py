@@ -9,7 +9,7 @@ class Command(BaseCommand):
         try:
             # 检查读书内容菜单是否存在
             try:
-                menu = Menu.objects.get(name='读书签到')
+                menu = Menu.objects.get(name='读书内容')
                 self.stdout.write(f'✓ 找到菜单: {menu.name}')
             except Menu.DoesNotExist:
                 self.stdout.write(self.style.ERROR('✗ 未找到读书内容菜单'))

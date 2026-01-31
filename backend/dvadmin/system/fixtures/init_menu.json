@@ -458,6 +458,24 @@
             "value": "role:SetUserRole",
             "api": "/api/system/role/{id}/set_role_users/",
             "method": 2
+          },
+          {
+            "name": "权限配置",
+            "value": "role:Permission",
+            "api": "/api/system/role/{id}/permission/",
+            "method": 0
+          },
+          {
+            "name": "授权用户添加",
+            "value": "role:AuthorizedAdd",
+            "api": "/api/system/role/{id}/add_role_users/",
+            "method": 1
+          },
+          {
+            "name": "授权用户查询",
+            "value": "role:AuthorizedSearch",
+            "api": "/api/system/role/get_role_users/",
+            "method": 0
           }
         ],
         "menu_field": [
