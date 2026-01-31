@@ -386,6 +386,10 @@ API_MODEL_MAP = {
 
 DJANGO_CELERY_BEAT_TZ_AWARE = False
 CELERY_TIMEZONE = "Asia/Shanghai"  # celery 时区问题
+
+# Celery broker 配置 - 使用 Redis 作为消息代理
+CELERY_BROKER_URL = locals().get('REDIS_URL', 'redis://127.0.0.1:6379/3')
+CELERY_RESULT_BACKEND = locals().get('REDIS_URL', 'redis://127.0.0.1:6379/3')
 # 静态页面压缩
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
