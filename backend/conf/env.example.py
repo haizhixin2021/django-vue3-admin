@@ -48,3 +48,6 @@ LOGIN_NO_CAPTCHA_AUTH = True
 ALLOWED_HOSTS = ["*"]
 # 列权限中排除App应用
 COLUMN_EXCLUDE_APPS = []
+
+DIFY_API_KEY = 'your-api-key'                    # 大模型 API Key
+DIFY_API_URL = 'https://api.deepseek.com/v1/chat/completions'  # API 地址（兼容 OpenAI 格式）
