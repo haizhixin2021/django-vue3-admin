@@ -4,6 +4,8 @@ from wenyuan.serializers import ReadContentSerializer, ReadContentCreateSerializ
 from django_filters import rest_framework as filters
 from django.db import transaction
 import re
+from wenyuan.llm_service import SignListLLMParser
+
 
 
 class ReadContentFilter(filters.FilterSet):
@@ -178,15 +180,22 @@ class ReadContentViewSet(CustomModelViewSet):
         """
         print(f"DEBUG: 原始签到列表文本: {sign_list}")
 
+        # 调用dify工作流解析签到人员列表
+        sign_parser = SignListLLMParser()
+        sign_list = sign_parser._call_dify_workflow(sign_list)
+        if not sign_list:
+            print(f"DEBUG: 调用dify工作流解析失败，原始文本: {sign_list}")
+            return
+
         # 统一分隔符：如果包含中文顿号，替换为英文句号
-        if '、' in sign_list:
-            sign_list = sign_list.replace('、', '.')
-            print(f"DEBUG: 替换中文顿号后的文本: {sign_list}")
+        #if '、' in sign_list:
+        #    sign_list = sign_list.replace('、', '.')
+        #    print(f"DEBUG: 替换中文顿号后的文本: {sign_list}")
 
         # 处理数字后面直接跟汉字的情况（没有分隔符），在数字和汉字之间插入句号
         # 匹配模式：数字后面直接跟汉字（不是句号）
         import re as regex_module
-        sign_list = regex_module.sub(r'(\d)([\u4e00-\u9fa5])', r'\1.\2', sign_list)
+        #sign_list = regex_module.sub(r'(\d)([\u4e00-\u9fa5])', r'\1.\2', sign_list)
         print(f"DEBUG: 统一分隔符后的文本: {sign_list}")
 
         pattern = r'(\d+)\.([^\d.]+)'
@@ -226,15 +235,22 @@ class ReadContentViewSet(CustomModelViewSet):
 
         print(f"DEBUG: 原始签到列表文本: {sign_list}")
 
+        # 调用dify工作流解析签到人员列表
+        sign_parser = SignListLLMParser()
+        sign_list = sign_parser._call_dify_workflow(sign_list)
+        if not sign_list:
+            print(f"DEBUG: 调用dify工作流解析失败，原始文本: {sign_list}")
+            return
+
         # 统一分隔符：如果包含中文顿号，替换为英文句号
-        if '、' in sign_list:
-            sign_list = sign_list.replace('、', '.')
-            print(f"DEBUG: 替换中文顿号后的文本: {sign_list}")
+        #if '、' in sign_list:
+        #    sign_list = sign_list.replace('、', '.')
+        #    print(f"DEBUG: 替换中文顿号后的文本: {sign_list}")
 
         # 处理数字后面直接跟汉字的情况（没有分隔符），在数字和汉字之间插入句号
         # 匹配模式：数字后面直接跟汉字（不是句号）
         import re as regex_module
-        sign_list = regex_module.sub(r'(\d)([\u4e00-\u9fa5])', r'\1.\2', sign_list)
+        #sign_list = regex_module.sub(r'(\d)([\u4e00-\u9fa5])', r'\1.\2', sign_list)
         print(f"DEBUG: 统一分隔符后的文本: {sign_list}")
 
         pattern = r'(\d+)\.([^\d.]+)'

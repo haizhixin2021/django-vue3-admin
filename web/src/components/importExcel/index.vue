@@ -118,6 +118,7 @@ const handleFileSuccess=function (response:any, file:any, fileList:any) {
   return request({
     url: props.api + 'import_data/',
     method: 'post',
+    timeout: 600000,
     data: {
       url: response.data.url
     }
