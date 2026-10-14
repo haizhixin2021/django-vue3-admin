@@ -16,6 +16,7 @@ env:
   ALIYUN_NAMESPACE: ${{ secrets.ALIYUN_NAMESPACE }}
   ALIYUN_USERNAME: ${{ secrets.ALIYUN_USERNAME }}
   ALIYUN_PASSWORD: ${{ secrets.ALIYUN_PASSWORD }}
+  BUILDX_NO_DEFAULT_ATTESTATIONS: "1"
 
 jobs:
   build-and-push-django:
