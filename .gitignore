@@ -4,7 +4,7 @@
 
 .history/
 .vscode/
-web/package-lock.json
+#web/package-lock.json
 
 *.bat
 /docker_env/redis/data/
