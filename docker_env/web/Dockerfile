@@ -2,7 +2,7 @@ FROM node:20-alpine
 WORKDIR /web/
 COPY web/. .
 #RUN yarn install --registry=https://registry.npmmirror.com
-RUN npm ci --registry=https://registry.npmmirror.com
+RUN npm ci --registry=https://registry.npmmirror.com --legacy-peer-deps
 #RUN yarn build
 RUN npm run build
 
