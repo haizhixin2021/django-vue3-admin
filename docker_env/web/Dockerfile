@@ -1,8 +1,10 @@
 FROM node:20-alpine
 WORKDIR /web/
 COPY web/. .
-RUN yarn install --registry=https://registry.npmmirror.com
-RUN yarn build
+#RUN yarn install --registry=https://registry.npmmirror.com
+RUN npm ci --registry=https://registry.npmmirror.com
+#RUN yarn build
+RUN npm run build
 
 FROM nginx:alpine
 COPY ./docker_env/nginx/my.conf /etc/nginx/conf.d/my.conf
