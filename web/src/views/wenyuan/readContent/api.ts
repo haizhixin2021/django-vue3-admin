@@ -23,6 +23,7 @@ export function AddObj(obj: AddReq) {
 		url: apiPrefix,
 		method: 'post',
 		data: obj,
+		timeout: 60000,
 	});
 }
 
@@ -31,6 +32,7 @@ export function UpdateObj(obj: EditReq) {
 		url: apiPrefix + obj.id + '/',
 		method: 'put',
 		data: obj,
+		timeout: 60000,
 	});
 }
 

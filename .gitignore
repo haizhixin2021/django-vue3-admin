@@ -7,3 +7,6 @@
 web/package-lock.json
 
 *.bat
+/docker_env/redis/data/
+/docker_env/mysql/data/
+.env
