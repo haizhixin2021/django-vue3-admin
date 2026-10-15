@@ -28,7 +28,7 @@ services:
       DATABASE_HOST: dvadmin3-mysql
       TZ: Asia/Shanghai
     volumes:
-      - ./backend:/backend
+      - ./backend/conf:/backend/conf
       - ./logs/log:/var/log
     ports:
       - "48000:8000"
@@ -75,7 +75,7 @@ services:
       DATABASE_HOST: dvadmin3-mysql
       TZ: Asia/Shanghai
     volumes:
-      - ./backend:/backend
+      - ./backend/conf:/backend/conf
       - ./logs/log:/var/log
     restart: always
     networks:
