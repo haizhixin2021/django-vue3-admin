@@ -49,3 +49,20 @@ export function DelObj(id: DelReq) {
 		data: { id },
 	});
 }
+
+export function GetStatistics(params: { start_date?: string; end_date?: string }) {
+	return request({
+		url: apiPrefix + 'statistics/',
+		method: 'get',
+		params,
+	});
+}
+
+export function ExportStatistics(params: { start_date?: string; end_date?: string }) {
+	return request({
+		url: apiPrefix + 'export_statistics/',
+		method: 'get',
+		params,
+		responseType: 'blob',
+	});
+}
