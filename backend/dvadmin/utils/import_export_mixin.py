@@ -140,7 +140,132 @@ class ImportSerializerMixin:
         else:
             # 从excel中组织对应的数据结构，然后使用序列化器保存
             queryset = self.filter_queryset(self.get_queryset())
-            # 获取多对多字段
+
+            # 异步导入：传 async=true 参数时走后台线程（无需 Celery/Redis）
+            use_async = request.query_params.get('async') == 'true' or request.data.get('async') is True
+            if use_async:
+                import threading
+                from dvadmin.utils.import_export import import_to_data
+                from dvadmin.system.models import DownloadCenter
+
+                model_class = queryset.model
+                serializer_class = self.import_serializer_class
+
+                dc_instance = DownloadCenter.objects.create(
+                    creator=request.user,
+                    task_name=f'{model_class._meta.verbose_name}数据导入任务',
+                    dept_belong_id=request.user.dept_id if request.user else None,
+                    description='任务已创建，等待执行...',
+                )
+
+                file_url = request.data.get("url")
+                import_field_dict = self.import_field_dict
+                dc_pk = dc_instance.pk
+                user_pk = request.user.pk if request.user else None
+                user_dept_id = request.user.dept_id if request.user else None
+
+                def run_import():
+                    """后台线程中执行导入，不依赖 Celery"""
+                    import threading
+                    print(f"[导入线程启动] thread={threading.current_thread().ident}, dc_pk={dc_pk}")
+                    try:
+                        from dvadmin.system.models import DownloadCenter as _DC
+                        instance = _DC.objects.get(pk=dc_pk)
+                        print(f"[导入线程] 拿到 DownloadCenter: id={instance.id}, status={instance.task_status}, desc={instance.description}")
+                        instance.task_status = 1
+                        instance.description = "开始读取文件..."
+                        instance.save()
+                        print("[导入线程] 写入第一步进度 OK")
+
+                        # 获取多对多字段
+                        m2m_fields = [
+                            ele.name for ele in queryset.model._meta.get_fields()
+                            if hasattr(ele, "many_to_many") and ele.many_to_many is True
+                        ]
+                        print(f"[导入线程] m2m_fields={m2m_fields}")
+
+                        instance.description = "解析 Excel 文件..."
+                        instance.save()
+
+                        import_field_dict_with_id = {'id': '更新主键(勿改)', **import_field_dict}
+                        print(f"[导入线程] 开始 import_to_data, file_url={file_url}")
+                        data = import_to_data(file_url, import_field_dict_with_id, m2m_fields)
+                        print(f"[导入线程] Excel 解析完成, 共 {len(data)} 条")
+
+                        total = len(data)
+                        success_count = 0
+                        fail_count = 0
+                        errors = []
+
+                        # 查真实 User 对象，确保 request.user 属性完整
+                        from django.contrib.auth import get_user_model
+                        UserModel = get_user_model()
+                        try:
+                            real_user = UserModel.objects.get(pk=user_pk) if user_pk else None
+                            print(f"[导入线程] 查到真实用户: {real_user}")
+                        except Exception as e:
+                            print(f"[导入线程] 查真实用户失败: {e}")
+                            real_user = None
+
+                        class FakeRequest:
+                            user = real_user
+
+                        fake_request = FakeRequest()
+                        print(f"[导入线程] FakeRequest.user={fake_request.user}")
+
+                        instance.description = f"开始处理，共 {total} 条..."
+                        instance.save()
+
+                        # 每 2 条更改进度
+                        BATCH_SIZE = 2
+                        for idx, ele in enumerate(data, 1):
+                            try:
+                                filter_dic = {'id': ele.get('id')}
+                                inst = filter_dic and queryset.filter(**filter_dic).first()
+                                serializer = serializer_class(inst, data=ele, request=fake_request)
+                                serializer.is_valid(raise_exception=True)
+                                serializer.save()
+                                success_count += 1
+                            except Exception as e:
+                                fail_count += 1
+                                err_msg = f"第 {idx} 条: {str(e)[:200]}"
+                                print(f"[导入线程] 失败 {err_msg}")
+                                import traceback as _tb2
+                                print(_tb2.format_exc()[:300])
+                                errors.append(err_msg)
+                                if len(errors) > 20:
+                                    break
+
+                            if idx % BATCH_SIZE == 0 or idx == total:
+                                instance.description = f"已处理 {idx}/{total} (成功 {success_count}，失败 {fail_count})"
+                                instance.save()
+
+                        instance.task_status = 2
+                        if fail_count > 0:
+                            instance.description = (
+                                f"导入完成：共 {total} 条，成功 {success_count}，失败 {fail_count}。"
+                                f"错误: {'; '.join(errors[:10])}"
+                            )[:500]
+                        else:
+                            instance.description = f"导入完成：共 {total} 条，全部成功"
+                        instance.save()
+
+                    except Exception as e:
+                        import traceback as _tb
+                        try:
+                            instance = DownloadCenter.objects.get(pk=dc_pk)
+                            instance.task_status = 3
+                            instance.description = f"导入失败: {str(e)[:200]}\n{_tb.format_exc()[:300]}"
+                            instance.save()
+                        except Exception:
+                            pass
+
+                thread = threading.Thread(target=run_import, daemon=True)
+                # 必须等父事务提交后再启动线程，否则线程读不到刚创建的 DownloadCenter
+                transaction.on_commit(lambda: thread.start())
+                return SuccessResponse(data={'task_id': dc_pk}, msg='导入任务已创建，请查看进度')
+
+            # 同步导入（原有逻辑）
             m2m_fields = [
                 ele.name
                 for ele in queryset.model._meta.get_fields()

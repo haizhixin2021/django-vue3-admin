@@ -2,7 +2,7 @@
 	<fs-page>
 		<fs-crud ref="crudRef" v-bind="crudBinding">
 			<template #actionbar-right>
-				<importExcel api="api/wenyuan/read_content/" v-auth="'readContent:Import'">导入</importExcel>
+				<importExcel api="api/wenyuan/read_content/" :async="true" v-auth="'readContent:Import'">导入</importExcel>
 			</template>
 		</fs-crud>
 		<signPersonnel ref="subSignPersonnelRef"></signPersonnel>
