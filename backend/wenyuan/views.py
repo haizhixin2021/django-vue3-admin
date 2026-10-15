@@ -1,8 +1,17 @@
+from urllib.parse import quote
+
+from django.http import HttpResponse
 from dvadmin.utils.viewset import CustomModelViewSet
+from dvadmin.utils.json_response import SuccessResponse, ErrorResponse
 from wenyuan.models import ReadContent, ReadSign
 from wenyuan.serializers import ReadContentSerializer, ReadContentCreateSerializer, ReadContentImportSerializer, ReadSignSerializer, ReadSignCreateSerializer
 from django_filters import rest_framework as filters
 from django.db import transaction
+from django.db.models import Count
+from openpyxl import Workbook
+from openpyxl.styles import Font
+from openpyxl.utils import get_column_letter
+from rest_framework.decorators import action
 import re
 from wenyuan.llm_service import SignListLLMParser
 
@@ -300,3 +309,91 @@ class ReadSignViewSet(CustomModelViewSet):
         print(f"DEBUG: request.query_params = {request.query_params}")
         print(f"DEBUG: request.GET = {request.GET}")
         return super().list(request, *args, **kwargs)
+
+    @action(detail=False, methods=['get'], url_path='statistics')
+    def statistics(self, request):
+        """
+        读书次数统计：按时间段统计每个人的读书次数
+        参数: start_date (起始日期), end_date (终止日期)，格式 YYYYMMDD
+        """
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+
+        queryset = ReadSign.objects.all()
+        if start_date and end_date:
+            queryset = queryset.filter(read_date__gte=start_date, read_date__lte=end_date)
+
+        stats = queryset.values('read_person').annotate(
+            count=Count('id')
+        ).order_by('-count')
+
+        return SuccessResponse(data=list(stats), msg='获取统计数据成功')
+
+    @action(detail=False, methods=['get'], url_path='export_statistics')
+    def export_statistics(self, request):
+        """
+        导出读书统计到 Excel
+        参数: start_date (起始日期), end_date (终止日期)，格式 YYYYMMDD
+        """
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+
+        queryset = ReadSign.objects.all()
+        if start_date and end_date:
+            queryset = queryset.filter(read_date__gte=start_date, read_date__lte=end_date)
+
+        stats = list(
+            queryset.values('read_person').annotate(count=Count('id')).order_by('-count')
+        )
+
+        # 生成文件名
+        if start_date and end_date:
+            filename = f"读书统计_{start_date}_{end_date}.xlsx"
+        else:
+            filename = f"读书统计.xlsx"
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "读书统计"
+
+        # 表头
+        headers = ["排名", "姓名", "读书次数"]
+        ws.append(headers)
+
+        # 表头加粗
+        bold_font = Font(bold=True)
+        for cell in ws[1]:
+            cell.font = bold_font
+
+        # 数据行
+        total_count = 0
+        for idx, item in enumerate(stats, 1):
+            ws.append([idx, item['read_person'], item['count']])
+            total_count += item['count']
+
+        # 汇总行
+        ws.append(["合计", f"{len(stats)} 人", total_count])
+        last_row = ws.max_row
+        for cell in ws[last_row]:
+            cell.font = bold_font
+
+        # 自动列宽
+        for col_idx, header in enumerate(headers, 1):
+            max_len = len(str(header))
+            for row in ws.iter_rows(min_col=col_idx, max_col=col_idx, min_row=2, max_row=last_row):
+                for cell in row:
+                    cell_val = str(cell.value) if cell.value else ''
+                    # 中文字符算 2 宽度
+                    char_len = sum(2 if ord(c) > 127 else 1 for c in cell_val)
+                    if char_len > max_len:
+                        max_len = char_len
+            ws.column_dimensions[get_column_letter(col_idx)].width = max_len + 4
+
+        # 冻结首行
+        ws.freeze_panes = 'A2'
+
+        response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response["Access-Control-Expose-Headers"] = "Content-Disposition"
+        response["Content-Disposition"] = f'attachment;filename={quote(filename)}'
+        wb.save(response)
+        return response
