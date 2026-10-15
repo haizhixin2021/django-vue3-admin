@@ -204,7 +204,7 @@ const closeAndRefresh = function () {
 
 // 轮询异步导入任务状态
 const startPolling = function (taskId: number) {
-  const url = getBaseURL() + 'api/system/download_center/' + taskId + '/'
+  const url = '/system/download_center/' + taskId + '/'
   pollTimer.value = window.setInterval(async () => {
     try {
       const res = await request({ url, method: 'get' })
